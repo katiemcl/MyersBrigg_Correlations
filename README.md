@@ -7,3 +7,5 @@ among other traits.
 
 Sem2Observations.csv: contains data imported from iOS apps Daylio (weather, mood), Apple Health + Pillow Automatic Sleep Tracker
 (sleep), and manual weekly entries of MBTI from [16personalities.com](https://www.16personalities.com)
+
+Github does not render R Notebooks. Working on a way to display (alternative: download
