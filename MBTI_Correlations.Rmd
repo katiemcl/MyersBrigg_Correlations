@@ -1,0 +1,130 @@
+---
+title: "R Notebook: Myers Briggs Type Indicator Correlations"
+output: html_notebook
+---
+
+## Description 
+
+The Myers Briggs Type Indicator (MBTI) is a 4-letter code produced from a self-reported assessment designed to reflect an individual's personality traits. People of the same MBTI share common strengths & weaknesses, relationship characteristics, and habits. Theoretically, each person has their own unchanging Myers Briggs Type.
+
+However, I found that my MBTI changed frequently based on how I interpreted the question and the information I used to come to an answer. This is an analysis of potential factors that could account for the changes in my MBTI over a course of 3 months. I retook the Myers Briggs Test on [16personalities.com](16personalities.com) once a week and additionally tracked daily change in the weather, sleep, and my mood on the following scales:
+
+Weather: 4 = sunny; 3 = cloudy; 2 = windy; 1 = rainy
+
+Mood: 5 = rad; 4 = great; 3 = meh; 2 = bad; 1 = awful
+
+## Data Analysis
+
+```{r}
+#import libraries
+library(readr)
+library(dplyr)
+library(plotly)
+
+```
+
+
+```{r}
+# load and inspect datafile
+data <- read_csv('Sem2Observations.csv')
+
+data
+```
+
+```{r}
+# clean dataframe
+data <- data %>%
+    filter(!is.na(sleep))
+
+```
+
+```{r}
+# patterns per ESTP (correlations between weather, mood, MBTI)
+estp <- data %>%
+  filter(myers == 'ESTP') %>%
+  group_by(weather, mood) 
+
+rows = nrow(estp)
+
+estp_freq <- estp %>%
+  summarize(count = n()) %>%
+  arrange(desc(count)) %>%
+  mutate(percent = count * 100 / rows)
+         
+head(estp_freq)
+```
+
+
+```{r}
+# patterns per ENFP (correlations between weather, mood, MBTI)
+enfp <- data %>%
+  filter(myers == 'ENFP') %>%
+  group_by(weather, mood) 
+
+rows = nrow(enfp)
+
+enfp_freq <- enfp %>%
+  summarize(count = n()) %>%
+  arrange(desc(count)) %>%
+  mutate(percent = count * 100 / rows)
+         
+head(enfp_freq)
+```
+The majority of the ENFP/ESTP (shared common factor of E - Extrovert) aligned with sunny weather and good mood (mood = 4, 5). The weather change can be explained by the period of time I moved from Princeton back home to California during the pandemic (March 16, 2020)
+
+```{r}
+# patterns per INFP (correlations between weather, mood, MBTI)
+infp <- data %>%
+  filter(myers == 'INFP') %>%
+  group_by(weather, mood) 
+
+rows = nrow(infp)
+
+infp_freq <- infp %>%
+  summarize(count = n()) %>%
+  arrange(desc(count)) %>%
+  mutate(percent = count * 100 / rows)
+         
+head(infp_freq)
+```
+
+ISFP had only one data point 
+```{r}
+# patterns per ISFP (correlations between weather, mood, MBTI)
+isfp <- data %>%
+  filter(myers == 'ISFP') %>%
+  group_by(weather, mood) 
+
+rows = nrow(infp)
+
+isfp_count <- isfp %>%
+  summarize(count = n()) 
+         
+head(isfp_count)
+```
+
+Below is an interactive 3D graph dispalying potential relationships between the variables and respective MBTI. Data appears to be very random.
+```{r}
+# 3D Graph
+x <- data$weather
+y <- data$sleep
+z <- data$mood
+
+myers <- c("ESTP", "ENFP", "INFP", "ISFP")
+hex <- c("#DBC556", "#6CA673", "#805BB5", "#5687E9")
+
+color_code <- data.frame(myers, hex)
+
+colors <- data %>%
+  left_join(color_code) %>%
+  pull(hex)
+
+fig <- plot_ly(data = data, x = ~weather, y = ~sleep, z = ~mood, 
+          color = ~myers)
+fig <- fig %>%
+    add_markers() %>%
+    layout(title = 'MBTI Relation with Mood, Sleep, Weather')
+fig
+```
+
+Click/scroll over graph to interact
